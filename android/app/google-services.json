@@ -1,0 +1,40 @@
+{
+  "project_info": {
+    "project_number": "149723645888",
+    "firebase_url": "https://daily-bus-912ad-default-rtdb.firebaseio.com",
+    "project_id": "daily-bus-912ad",
+    "storage_bucket": "daily-bus-912ad.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:149723645888:android:e12a0c8d4efd78fc42ea25",
+        "android_client_info": {
+          "package_name": "com.example.new_app"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "149723645888-5jf520jt2n82auq2k366fitqijdim5kn.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCiPEbMwKWSARwCL1Sm91gP5yC-UmCH96E"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "149723645888-5jf520jt2n82auq2k366fitqijdim5kn.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
