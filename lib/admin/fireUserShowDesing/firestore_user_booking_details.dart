@@ -32,7 +32,7 @@ class _UserBookingDetailsState extends State<UserBookingDetails> {
             // const Text("User Booking Details"),
             SizedBox(height:20,
               child: Text(
-                    "                           Bus_Number         Pickup_Time         Seat_Quantity          PickUp_Location          Destination         UserID",
+                    "                           Bus_Number         Pickup_Time         Seat_Quantity         PickUp_Location    Destination   ticket        UserID",
                 style: TextStyle(fontSize: 16),
               ),
 
@@ -119,6 +119,9 @@ class _UserBookingDetailsState extends State<UserBookingDetails> {
                     ),
                     DataColumn(
                       label: Text( dataList[index]["destination"]),
+                    ),
+                    DataColumn(
+                      label: Text( dataList[index]["ticket_number"]),
                     ),
                     DataColumn(
                       label: Text( dataList[index]["userID"]),

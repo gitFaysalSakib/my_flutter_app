@@ -21,23 +21,6 @@ class _SignupScreenState extends State<SignupScreen> {
   final GlobalKey<FormState> _formKey = GlobalKey();
   TextEditingController _passwordController = new TextEditingController();
 
-  //get auth user id..
-  // final FirebaseAuth _userAuth = FirebaseAuth.instance;
-  //
-  // //get auth user id..
-  // _getCurrentUser() async {
-  //   final User user = await _userAuth.currentUser;
-  //   final uid = user.uid;
-  //   print(uid);
-  //
-  // }
-
-  // Future<String> inputData() async {
-  //   final User user = await FirebaseAuth.instance.currentUser;
-  //   final String uid = user.uid.toString();
-  //   return uid;
-  // }
-
 // passing sign up data...
   Map<String, String> _authData = {
     'email': '',
@@ -85,11 +68,12 @@ class _SignupScreenState extends State<SignupScreen> {
         title: Text('Sign up'),
         backgroundColor: Colors.teal,
         actions: <Widget>[
-          FlatButton(
+          TextButton(
             child: Row(
               children: <Widget>[Text('Login'), Icon(Icons.person)],
             ),
-            textColor: Colors.white,
+            style:
+                TextButton.styleFrom(textStyle: TextStyle(color: Colors.white)),
             onPressed: () {
               Navigator.of(context).pushReplacementNamed(LoginScreen.routeName);
             },

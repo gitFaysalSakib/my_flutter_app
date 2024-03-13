@@ -30,7 +30,6 @@ class MyApp extends StatelessWidget {
         providers: [
           ChangeNotifierProvider(
             create: (context) => MenuController(),
-          // ChangeNotifierProvider.value(value: Authentication()),
 
            ),
         ],

@@ -6,6 +6,9 @@ import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
 import 'package:new_app/hire_customize_bus.dart';
 import 'package:new_app/new_home_screen.dart';
+import 'package:new_app/services/cloude_firestore.dart';
+import 'package:new_app/viewsModel/steam_view_model.dart';
+import 'package:stacked/stacked.dart';
 // import 'package:new_app/personal_info_setup_screen.dart';
 // import './home_screen_customlist.dart';
 // import './profile_edit_screen.dart';
@@ -17,22 +20,29 @@ import './login_screen.dart';
 // import './available_day_schedule_screen.dart';
 import './myProfile_screen_List.dart';
 import 'bus_schedule_screen.dart';
+import 'commonDeawer/drawer_widget_sereen.dart';
+import 'seat_booking_all_logic/seat_booking_logic_class.dart';
+
+late TextEditingController radioTimetextController;
+late TextEditingController radioTypetextController;
 
 class SeatBooking extends StatefulWidget {
   static const routeName = '/seatbook';
-
-  //store vale into databse so using some variable and use class storebooked...
-  // final StoreBookedData storeBookedData;
-  //
-  //SeatBooking({Key key, @required this.getDuration}) : super(key: key);
 
   @override
   _SeatBookingState createState() => _SeatBookingState();
 }
 
 class _SeatBookingState extends State<SeatBooking> {
-  late TextEditingController radioTimetextController;
-  late TextEditingController radioTypetextController;
+  final FirestoreService fire = FirestoreService();
+
+  final GlobalKey<FormState> _formKey = GlobalKey();
+
+  //late TextEditingController radioTimetextController;
+  // late TextEditingController radioTypetextController;
+  late TextEditingController studentPrice;
+  late TextEditingController generalPrice;
+  late TextEditingController disablePrice;
 
   late DatabaseReference ref;
   late DatabaseReference ref2;
@@ -45,172 +55,127 @@ class _SeatBookingState extends State<SeatBooking> {
   FirebaseAuth _firebaseAuth = FirebaseAuth.instance;
   late User user;
 
-  CollectionReference usersProfile =
-      FirebaseFirestore.instance.collection('profile');
-  CollectionReference usersPhone =
-      FirebaseFirestore.instance.collection('UserPhoneNumber');
-
   CollectionReference bookedUsersTypeFireStore =
       FirebaseFirestore.instance.collection('userBookingTypeInfo');
 
-  Map userPersonalData = {'firstName': '', 'lastName': ''};
-  Map userPhoneNumber = {'PhoneNumber': ''};
-
-  String getFirstNameFirebase = '';
-  String getLastNameFirebase = '';
-  String getPhoneNumber = '';
-
-  String groupValue1 = '';
-  String groupValue2 = '';
+  CollectionReference adminSeatPriceTable =
+      FirebaseFirestore.instance.collection('adminSetPrice');
 
   // String getPassType;
   String getDuration = '';
   String getPassType = '';
 
-  // User data show on dashboard...
-  Future<void> showUserData() async {
-    user = _firebaseAuth.currentUser!;
-    String userId = user.uid;
-    try {
-      var response =
-          await usersProfile.where('LogInUserID', isEqualTo: userId).get();
-      if (response.docs.length > 0) {
-        setState(() {
-          getFirstNameFirebase =
-              userPersonalData['firstName'] = response.docs[0]['firstName'];
-          getLastNameFirebase =
-              userPersonalData['lastName'] = response.docs[0]['lastName'];
-        });
-      }
-      print(getFirstNameFirebase);
-    } on FirebaseException catch (e) {
-      print(e);
-    } catch (error) {
-      print(error);
+  String groupValue1 = '';
+  String groupValue2 = '';
+
+  late String getStudentPriceFire;
+  late String getGeneralPriceFire;
+  late String getDisablePriceFire;
+
+  Map adminSeatPrice = {
+    'disabled_price': '',
+    'general_price': '',
+    'student_price': '',
+  };
+  Map adminSeatPriceData = {
+    'seat_price': '',
+    'seat_type': '',
+  };
+
+  Future<void> getSeatPrice() async {
+    getStudentPriceFire = studentPrice.text;
+    getGeneralPriceFire = generalPrice.text;
+    getDisablePriceFire = disablePrice.text;
+
+    var response = await adminSeatPriceTable
+        .where('seat_type', isEqualTo: 'Student Pass')
+        .get();
+    print(response);
+    if (response.docs.length > 0) {
+      setState(() {
+        getStudentPriceFire =
+            adminSeatPrice['seat_price'] = response.docs[0]['seat_price'];
+
+        if (getStudentPriceFire == null) {
+          studentPrice = TextEditingController(text: '');
+        } else {
+          studentPrice = TextEditingController(text: '$getStudentPriceFire');
+        }
+
+        // print(getGeneralPriceFire);
+      });
     }
-  }
 
-  // User Phone Number show on dashboard...
-  Future<void> showUserPhone() async {
-    user = _firebaseAuth.currentUser!;
-    String userId = user.uid;
-    print(userId);
-    try {
-      var response = await usersPhone.where('UserId', isEqualTo: userId).get();
-      if (response.docs.length > 0) {
-        setState(() {
-          getPhoneNumber =
-              userPhoneNumber['PhoneNumber'] = response.docs[0]['PhoneNumber'];
-        });
-      }
-      print(getPhoneNumber);
-    } on FirebaseException catch (e) {
-      print(e);
-    } catch (error) {
-      print(error);
+    var response2 = await adminSeatPriceTable
+        .where('seat_type', isEqualTo: 'General Pass')
+        .get();
+    if (response2.docs.length > 0) {
+      setState(() {
+        getGeneralPriceFire =
+            adminSeatPrice['seat_price'] = response2.docs[0]['seat_price'];
+
+        if (getGeneralPriceFire == null) {
+          generalPrice = TextEditingController(text: '');
+        } else {
+          generalPrice = TextEditingController(text: '$getGeneralPriceFire');
+        }
+      });
     }
-  }
 
-  // StoreBookedData storeBookedData2;
+    var response3 = await adminSeatPriceTable
+        .where('seat_type', isEqualTo: 'Disabled Pass')
+        .get();
+    if (response3.docs.length > 0) {
+      setState(() {
+        getDisablePriceFire =
+            adminSeatPrice['seat_price'] = response3.docs[0]['seat_price'];
 
-  //this saveData function work for store value in database..
-  void saveData() {
-    if (groupValue1 == null || groupValue2 == null) {
-      showDialog(
-          context: context,
-          builder: (context) {
-            return AlertDialog(
-              title: Text('Please Input Your Data'),
-              content: Column(
-                children: <Widget>[
-                  ElevatedButton(
-                    onPressed: () {
-                      Navigator.of(context)
-                          .pushReplacementNamed(SeatBooking.routeName);
-                    },
-                    child: Text('Ok'),
-                  ),
-                ],
-              ),
-            );
-          });
-      print('no data');
-    } else {
-      user = _firebaseAuth.currentUser!;
-      String userId = user.uid;
-      radioTimetextController.text = groupValue1;
-      radioTypetextController.text = groupValue2;
-
-      getDuration = radioTimetextController.text;
-      getPassType = radioTypetextController.text;
-      // String getUserEmail = '$finalEmailget';
-
-      Map<String, String> storeBookingType = {
-        'booking_duration': getDuration,
-        'booking_type': getPassType,
-        'userID': userId
-      };
-      bookedUsersTypeFireStore
-          .add(storeBookingType)
-          .then((value) => print('add'))
-          .catchError((error) => print('fail:$error'));
-
-      // ref.push().set(storeBookingType);
-      print(storeBookingType);
-      // print(getDuration);
-      // Navigator.of(context).pushReplacementNamed(NextSeatBooking.routeName);
+        if (getDisablePriceFire == null) {
+          disablePrice = TextEditingController(text: '');
+        } else {
+          disablePrice = TextEditingController(text: '$getDisablePriceFire');
+        }
+      });
     }
   }
 
   Future<void> _signOut() async {
     await _firebaseAuth.signOut();
     user = await _firebaseAuth.currentUser!;
-    // String id = user.uid;
   }
 
   @override
   void initState() {
     radioTimetextController = TextEditingController();
     radioTypetextController = TextEditingController();
+    studentPrice = TextEditingController();
+    generalPrice = TextEditingController();
+    disablePrice = TextEditingController();
+
     ref = FirebaseDatabase.instance.reference().child('StoreValue');
     ref2 = FirebaseDatabase.instance
         .reference()
         .child('daily-bus-912ad-default-rtdb/Login');
 
-    //final reff = fireStore.reference().child('daily-bus-912ad-default-rtdb/Login');
-
-    showUserData();
-    showUserPhone();
+    fire.showUserPhone();
+    fire.showUserData();
+    getSeatPrice();
     super.initState();
   }
 
-  void Checkvalue() {
-    // reff.child('logEmail').once().then((DataSnapshot data){
-    //   retriveEmail =data.value;
-    //   print(retriveEmail);
-    //
-    // });
-  }
-
-  //
-
   @override
   Widget build(BuildContext context) {
-    //  groupValue1 = storeBookedData2.duration;
-    final reff = fireStore.reference().child('Login');
-
-    //print(retriveEmail);
-
+    // final reff = fireStore.reference().child('Login');
     return Scaffold(
       appBar: AppBar(
         title: Text('Booked Your Seat'),
         backgroundColor: Colors.teal,
         actions: <Widget>[
-          FlatButton(
+          TextButton(
             child: Row(
               children: <Widget>[Icon(Icons.home)],
             ),
-            textColor: Colors.white,
+            style:TextButton.styleFrom(textStyle: TextStyle(color: Colors.white)),
             onPressed: () {
               Navigator.of(context)
                   .pushReplacementNamed(NewHomeScreen.routeName);
@@ -218,66 +183,7 @@ class _SeatBookingState extends State<SeatBooking> {
           )
         ],
       ),
-      drawer: Drawer(
-        child: ListView(
-          children: <Widget>[
-            DrawerHeader(
-              decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                      colors: <Color>[Colors.cyan[900]!, Colors.cyan[900]!])),
-              child: Text(
-                '$getFirstNameFirebase' +
-                    '$getLastNameFirebase' +
-                    '\n$getPhoneNumber',
-                style: TextStyle(color: Colors.white, fontSize: 20.0),
-              ),
-            ),
-
-            ListTile(
-                leading: const Icon(Icons.person, size: 28.0,),
-                title: const Text("MY PROFILE", style: TextStyle(fontSize: 18.0),),
-                onTap: () => {
-                  Navigator.of(context)
-                      .pushReplacementNamed(MyProfileScreenList.routeName),
-                }
-            ),
-            ListTile(
-                leading: const Icon(Icons.bus_alert, size: 28.0,),
-                title: const Text("BUY BUSS PASS", style: TextStyle(fontSize: 18.0),),
-                onTap: () => {
-                  Navigator.of(context)
-                      .pushReplacementNamed(SeatBooking.routeName),
-                }
-            ),
-            ListTile(
-                leading: const Icon(Icons.schedule, size: 28.0,),
-                title: const Text("BUS SCHEDULE", style: TextStyle(fontSize: 18.0),),
-                onTap: () => {
-                  Navigator.of(context)
-                      .pushReplacementNamed(NewBusSchedule.routeName),
-                }
-            ),
-            ListTile(
-                leading: const Icon(Icons.bus_alert, size: 28.0,),
-                title: const Text("Hire A Bus", style: TextStyle(fontSize: 18.0),),
-                onTap: () => {
-                  Navigator.of(context)
-                      .pushReplacementNamed(HireCustomBus.routeName),
-                }
-            ),
-            ListTile(
-                leading: const Icon(Icons.logout, size: 28.0,),
-                title: const Text("LOG OUT", style: TextStyle(fontSize: 18.0),),
-                onTap: () => {
-                  Navigator.of(context)
-                      .pushReplacementNamed(LoginScreen.routeName),
-                }
-            ),
-
-
-          ],
-        ),
-      ),
+      drawer: DrawerTest(),
       body: Container(
         child: Card(
           shape: RoundedRectangleBorder(
@@ -299,55 +205,9 @@ class _SeatBookingState extends State<SeatBooking> {
               SizedBox(
                 height: 0.0,
               ),
-              Row(
-                children: <Widget>[
-                  Radio(
-                      value: '1 WEEK',
-                      groupValue: groupValue1,
-                      onChanged: (value) {
-                        setState(() {
-                          this.groupValue1 = value.toString();
-                          print(this.groupValue1);
-                          // storeBookedData2.duration =groupValue1;
-                          // print(storeBookedData2.duration);
-                        });
-                      }),
-                  Text(
-                    '1 WEEK',
-                    style: TextStyle(
-                        color: Colors.teal,
-                        fontSize: 20,
-                        fontWeight: FontWeight.bold),
-                  ),
-
-                  SizedBox(
-                    width: 40,
-                  ),
-
-                  //
-                  Radio(
-                      value: '1 MONTH',
-                      groupValue: groupValue1,
-                      onChanged: (value) {
-                        setState(() {
-                          this.groupValue1 = value.toString();
-                          print(this.groupValue1);
-                        });
-                      }),
-                  Text(
-                    '1 MONTH',
-                    style: TextStyle(
-                        color: Colors.teal,
-                        fontSize: 20,
-                        fontWeight: FontWeight.bold),
-                  ),
-                  SizedBox(
-                    width: 50,
-                  ),
-                ],
-              ),
+              RowOfRadioButton(),
               SizedBox(
-                height: 20,
+                height: 10,
               ),
 
               //Select Your Booking Category design
@@ -359,79 +219,44 @@ class _SeatBookingState extends State<SeatBooking> {
                   style: TextStyle(fontSize: 18.0, color: Colors.white),
                 ),
               ),
-              Row(
-                children: <Widget>[
-                  Radio(
-                      value: 'Student Pass',
-                      groupValue: groupValue2,
-                      onChanged: (value) {
-                        setState(() {
-                          this.groupValue2 = value.toString();
-                          print(this.groupValue2);
-                        });
-                      }),
-                  Text(
-                    'Student Pass',
-                    style: TextStyle(
-                        color: Colors.teal,
-                        fontSize: 20,
-                        fontWeight: FontWeight.bold),
-                  ),
-                ],
-              ),
-
-              Row(
-                children: <Widget>[
-                  Radio(
-                      value: 'General Pass',
-                      groupValue: groupValue2,
-                      onChanged: (value) {
-                        setState(() {
-                          this.groupValue2 = value.toString();
-                          print(this.groupValue2);
-                        });
-                      }),
-                  Text(
-                    'General Pass',
-                    style: TextStyle(
-                        color: Colors.teal,
-                        fontSize: 20,
-                        fontWeight: FontWeight.bold),
-                  ),
-                ],
-              ),
-
-              Row(
-                children: <Widget>[
-                  Radio(
-                      value: 'Disabled Pass',
-                      groupValue: groupValue2,
-                      onChanged: (value) {
-                        setState(() {
-                          this.groupValue2 = value.toString();
-                          print(this.groupValue2);
-                        });
-                      }),
-                  Text(
-                    'Disabled Pass',
-                    style: TextStyle(
-                        color: Colors.teal,
-                        fontSize: 20,
-                        fontWeight: FontWeight.bold),
-                  ),
-                ],
-              ),
+              BookingTypeWidget(),
               SizedBox(
-                height: 100,
+                height: 10,
               ),
+              Text(
+                'Price',
+                style: TextStyle(
+                    color: Colors.teal,
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold),
+              ),
+
+              PriceForm(),
               Container(
                 margin: EdgeInsets.all(10),
                 width: double.infinity,
                 child: ElevatedButton(
-                    onPressed: () {
-                      Navigator.of(context).pushReplacementNamed(NextSeatBooking.routeName);
-                      saveData();
-                      Checkvalue();
+                    onPressed: () async {
+                      user = _firebaseAuth.currentUser!;
+                      String userId = user.uid;
+                      try {
+                        var response = await bookedUsersTypeFireStore
+                            .where('userID', isEqualTo: userId)
+                            .get();
+                        if (response.docs.length > 0) {
+                          fire.updateUserBookingType();
+                          Navigator.of(context)
+                              .pushReplacementNamed(NextSeatBooking.routeName);
+                        } else {
+                          fire.saveData();
+                          Navigator.of(context)
+                              .pushReplacementNamed(NextSeatBooking.routeName);
+                        }
+                      } on FirebaseException catch (e) {
+                        print(e);
+                      } catch (error) {
+                        print(error);
+                      }
                     },
                     style: ElevatedButton.styleFrom(
                       primary: Colors.teal,
@@ -447,33 +272,191 @@ class _SeatBookingState extends State<SeatBooking> {
                           color: Colors.white),
                     )),
               ),
-
-              // ElevatedButton(onPressed: ()
-              // {
-              //   // reff.child('logEmail').once().then((DataSnapshot data){
-              //   //   setState(() {
-              //   //     retriveEmail = data.value;
-              //   //   });
-              //   //   print(data.value);
-              //   // });
-              //   //Navigator.of(context).pushReplacementNamed(NextSeatBooking.routeName);
-              //  // saveData();
-              //  // Checkvalue();
-              //
-              //   fireStore.child('logEmail').once().then((DataSnapshot snap){
-              //     retriveEmail = snap.value;
-              //    // print('logEmail :${snap.value}');
-              //
-              //   });
-              // },
-              //
-              //
-              //     child: Text('Next'),),
-              // Text(''),
             ],
           ),
         ),
       ),
+    );
+  }
+
+  Column BookingTypeWidget() {
+    return Column(
+      children: <Widget>[
+        Row(
+          children: <Widget>[
+            Radio(
+                value: 'Student Pass',
+                groupValue: fire.groupValue2,
+                onChanged: (value) {
+                  setState(() {
+                    this.fire.groupValue2 = value.toString();
+                    print(this.fire.groupValue2);
+                  });
+                }),
+            Text(
+              'Student Pass',
+              style: TextStyle(
+                  color: Colors.teal,
+                  fontSize: 20,
+                  fontWeight: FontWeight.bold),
+            ),
+          ],
+        ),
+        Row(
+          children: <Widget>[
+            Radio(
+                value: 'General Pass',
+                groupValue: fire.groupValue2,
+                onChanged: (value) {
+                  setState(() {
+                    this.fire.groupValue2 = value.toString();
+                    print(this.fire.groupValue2);
+                  });
+                }),
+            Text(
+              'General Pass',
+              style: TextStyle(
+                  color: Colors.teal,
+                  fontSize: 20,
+                  fontWeight: FontWeight.bold),
+            ),
+          ],
+        ),
+        Row(
+          children: <Widget>[
+            Radio(
+                value: 'Disabled Pass',
+                groupValue: fire.groupValue2,
+                onChanged: (value) {
+                  setState(() {
+                    this.fire.groupValue2 = value.toString();
+                    print(this.fire.groupValue2);
+                  });
+                }),
+            Text(
+              'Disabled Pass',
+              style: TextStyle(
+                  color: Colors.teal,
+                  fontSize: 20,
+                  fontWeight: FontWeight.bold),
+            ),
+          ],
+        ),
+      ],
+    );
+  }
+
+  Form PriceForm() {
+    return Form(
+      key: _formKey,
+      child: SingleChildScrollView(
+        child: Column(
+          children: [
+            TextFormField(
+              decoration: InputDecoration(labelText: 'Student Seat Price'),
+              enabled: false,
+              keyboardType: TextInputType.name,
+              controller: studentPrice,
+              validator: (value) {
+                if (value!.isEmpty || value is int) {
+                  return 'invalid';
+                }
+                return null;
+              },
+            ),
+            TextFormField(
+              decoration: InputDecoration(labelText: 'General Seat Price'),
+              enabled: false,
+              keyboardType: TextInputType.name,
+              controller: generalPrice,
+              validator: (value) {
+                if (value!.isEmpty || value is int) {
+                  return 'invalid';
+                }
+                return null;
+              },
+            ),
+            TextFormField(
+              decoration: InputDecoration(labelText: 'Disabled Seat Price'),
+              enabled: false,
+              keyboardType: TextInputType.name,
+              controller: disablePrice,
+              validator: (value) {
+                if (value!.isEmpty || value is int) {
+                  return 'invalid';
+                }
+                return null;
+              },
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget RowOfRadioButton() {
+    return Row(
+      children: <Widget>[
+        Radio(
+            value: '1 Day',
+            groupValue: fire.groupValue1,
+            onChanged: (value) {
+              setState(() {
+                this.fire.groupValue1 = value.toString();
+                print(this.fire.groupValue1);
+                // storeBookedData2.duration =groupValue1;
+                // print(storeBookedData2.duration);
+              });
+            }),
+        Text(
+          '1 Day',
+          style: TextStyle(
+              color: Colors.teal, fontSize: 20, fontWeight: FontWeight.bold),
+        ),
+        SizedBox(
+          width: 10,
+        ),
+
+        Radio(
+            value: '1 WEEK',
+            groupValue: fire.groupValue1,
+            onChanged: (value) {
+              setState(() {
+                this.fire.groupValue1 = value.toString();
+                print(this.fire.groupValue1);
+                // storeBookedData2.duration =groupValue1;
+                // print(storeBookedData2.duration);
+              });
+            }),
+        Text(
+          '1 WEEK',
+          style: TextStyle(
+              color: Colors.teal, fontSize: 20, fontWeight: FontWeight.bold),
+        ),
+
+        SizedBox(
+          width: 10,
+        ),
+
+        //
+        Radio(
+            value: '1 MONTH',
+            groupValue: fire.groupValue1,
+            onChanged: (value) {
+              setState(() {
+                this.fire.groupValue1 = value.toString();
+                print(this.fire.groupValue1);
+              });
+            }),
+        Text(
+          '1 MONTH',
+          style: TextStyle(
+              color: Colors.teal, fontSize: 20, fontWeight: FontWeight.bold),
+        ),
+        SizedBox(
+          width: 20,
+        ),
+      ],
     );
   }
 }

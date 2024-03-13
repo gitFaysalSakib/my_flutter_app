@@ -199,6 +199,8 @@ class _PersonalInfoState extends State<PersonalInfo> {
 
   @override
   Widget build(BuildContext context) {
+    // user = _firebaseAuth.currentUser!;
+
     return Scaffold(
       appBar: AppBar(
         elevation: 1,
@@ -256,7 +258,10 @@ class _PersonalInfoState extends State<PersonalInfo> {
                         image: DecorationImage(
                             fit: BoxFit.cover,
                             image: NetworkImage(
-                                "https://www.pexels.com/photo/stylish-focused-woman-leaned-on-hand-at-table-in-countryside-5368679/"))),
+                                "https://www.pexels.com/photo/stylish-focused-woman-leaned-on-hand-at-table-in-countryside-5368679/"
+
+                                //user.photoURL!
+                                ))),
                   ),
                   Positioned(
                     bottom: 0,

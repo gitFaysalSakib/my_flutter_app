@@ -1,28 +1,26 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/cupertino.dart';
+
 final CollectionReference collectionRef =
-FirebaseFirestore.instance.collection("profile");
+    FirebaseFirestore.instance.collection("profile");
 final CollectionReference collectionRef2 =
-FirebaseFirestore.instance.collection("UserPhoneNumber");
+    FirebaseFirestore.instance.collection("UserPhoneNumber");
 final CollectionReference collectionRef3 =
-FirebaseFirestore.instance.collection("userBookingTypeInfo");
+    FirebaseFirestore.instance.collection("userBookingTypeInfo");
 final CollectionReference collectionRef4 =
-FirebaseFirestore.instance.collection("bookedUsers");
+    FirebaseFirestore.instance.collection("bookedUsers");
 
 final CollectionReference collectionRef5 =
-FirebaseFirestore.instance.collection("busTimeTable");
+    FirebaseFirestore.instance.collection("busTimeTable");
 
 final CollectionReference collectionRef6 =
-FirebaseFirestore.instance.collection("busSeatUpdate");
+    FirebaseFirestore.instance.collection("busSeatUpdate");
 
 final CollectionReference collectionRef7 =
-FirebaseFirestore.instance.collection("busTimeTable");
+    FirebaseFirestore.instance.collection("busTimeTable");
 
 final CollectionReference collectionRef8 =
-FirebaseFirestore.instance.collection("hireBusInfo");
-
-
-
+    FirebaseFirestore.instance.collection("hireBusInfo");
 
 class FireStoreDataBase {
   List profileList = [];
@@ -49,7 +47,7 @@ class FireStoreDataBase {
   }
 }
 
-class FirestoreUserPhone{
+class FirestoreUserPhone {
   List userPhoneNumberList = [];
   // final CollectionReference collectionRef =
   // FirebaseFirestore.instance.collection("profile");
@@ -72,12 +70,9 @@ class FirestoreUserPhone{
       return null;
     }
   }
-
-
 }
 
-class FirestoreUsersBookingType{
-
+class FirestoreUsersBookingType {
   List bookingType = [];
   // final CollectionReference collectionRef =
   // FirebaseFirestore.instance.collection("profile");
@@ -100,11 +95,9 @@ class FirestoreUsersBookingType{
       return null;
     }
   }
-
 }
 
-class FirestoreUserBookingDetails{
-
+class FirestoreUserBookingDetails {
   List bookingDetails = [];
   Future getData() async {
     try {
@@ -124,10 +117,9 @@ class FirestoreUserBookingDetails{
       return null;
     }
   }
-
 }
 
-class FirestoreBusDetails{
+class FirestoreBusDetails {
   List busDetails = [];
   Future getData() async {
     try {
@@ -147,11 +139,9 @@ class FirestoreBusDetails{
       return null;
     }
   }
-
-
 }
-class FirestoreBusSeatUpdate{
 
+class FirestoreBusSeatUpdate {
   List busSeatUpdate = [];
   Future getData() async {
     try {
@@ -171,12 +161,9 @@ class FirestoreBusSeatUpdate{
       return null;
     }
   }
-
 }
 
-
-class FirestoreAllBussSchedule{
-
+class FirestoreAllBussSchedule {
   List busScheduleList = [];
   Future getData() async {
     try {
@@ -196,10 +183,9 @@ class FirestoreAllBussSchedule{
       return null;
     }
   }
-
 }
-class FirestoreHireBusData {
 
+class FirestoreHireBusData {
   List hireBusData = [];
   Future getData() async {
     try {
@@ -219,29 +205,33 @@ class FirestoreHireBusData {
       return null;
     }
   }
-
 }
 
-class FirestoreGabtoliTimeShow{
-
+class FirestoreGabtoliTimeShow {
   List gabtoliTimeList = [];
   Future getData() async {
     try {
-      //to get data from a single/particular document alone.
-      // var temp = await collectionRef.doc("<your document ID here>").get();
-
-      // to get data from all documents sequentially
       await collectionRef5.get().then((querySnapshot) {
-        for (var result in querySnapshot.docs) {
-          gabtoliTimeList.add(result.data());
-        }
-      });
 
+        for (var result in querySnapshot.docs) {
+         //print(result);
+
+          gabtoliTimeList.add(result.data());
+        //   var index1 = gabtoliTimeList.indexWhere((element)
+        //   => element["pick_up_location"] == "কলাবাগান বাস স্ট্যান্ড");
+        //   if(index1 !=-1){
+        //     print('jjjjjjjjj');
+        // gabtoliTimeList[index1] = gabtoliTimeList[index1]['pick_up_time'];
+        //   }
+        //   print(index1);
+        }
+
+      });
+    // print(gabtoliTimeList);
       return gabtoliTimeList;
     } catch (e) {
       debugPrint("Error - $e");
       return null;
     }
   }
-
 }

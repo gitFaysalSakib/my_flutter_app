@@ -1,11 +1,12 @@
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:new_app/admin/controllers/MenuController.dart';
+import 'package:new_app/admin/controllers/MenuController.dart' ;
 import 'package:new_app/admin/responsive.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:provider/provider.dart';
 
 import '../../../constants.dart';
+import '../../../login.dart';
 
 FirebaseAuth _firebaseAuth = FirebaseAuth.instance;
 late User user;
@@ -125,20 +126,13 @@ class SearchField extends StatelessWidget {
       ),
       onPressed: () async {
 
+          // user = (await _firebaseAuth.currentUser)!;
+          // var response = await _firebaseAuth.signOut();
+          // isLoggedIn = false;
+          // Navigator.of(context)
+          //     .pushReplacementNamed(Login.routeName);
 
-
-        // signOut method..
-
-         // await _firebaseAuth.signOut();
-          user = (await _firebaseAuth.currentUser)!;
-          var response = await _firebaseAuth.signOut();
-
-
-
-
-
-
-      },
+          },
       icon: Icon(Icons.logout),
       label: Text("Log out"),
     );

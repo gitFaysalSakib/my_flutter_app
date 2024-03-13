@@ -3,8 +3,10 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
 import 'package:new_app/personal_info_setup_screen.dart';
-import 'package:pinput/pin_put/pin_put.dart';
-import 'package:pinput/pin_put/pin_put_state.dart';
+// import 'package:pinput/pin_put/pin_put.dart';
+import 'package:pinput/pinput.dart';
+
+ // import 'package:pinput/pin_put/pin_put_state.dart';
 import './home_screen.dart';
 import 'new_home_screen.dart';
 
@@ -39,6 +41,8 @@ class _PhoneOtpState extends State<PhoneOtp> {
       FirebaseFirestore.instance.collection('UserPhoneNumber');
 
   final GlobalKey<ScaffoldState> _scaffoldkey = GlobalKey<ScaffoldState>();
+  final _globalKey = GlobalKey<ScaffoldMessengerState>();
+
   final FocusNode _pinPutFocusNode = FocusNode();
   final TextEditingController _pinPutController = TextEditingController();
   final BoxDecoration pinPutDecoration = BoxDecoration(
@@ -77,7 +81,10 @@ class _PhoneOtpState extends State<PhoneOtp> {
         showLoading = false;
       });
 
-      _scaffoldkey.currentState!
+      // _scaffoldkey.currentState!
+      //     .showSnackBar(SnackBar(content: Text(e.message.toString())));
+
+      _globalKey.currentState!
           .showSnackBar(SnackBar(content: Text(e.message.toString())));
     }
   }
@@ -186,7 +193,10 @@ class _PhoneOtpState extends State<PhoneOtp> {
                     setState(() {
                       showLoading = false;
                     });
-                    _scaffoldkey.currentState!.showSnackBar(SnackBar(
+                    // _scaffoldkey.currentState!.showSnackBar(SnackBar(
+                    //     content: Text(verificationFailed.message.toString())));
+
+                    _globalKey.currentState!.showSnackBar( SnackBar(
                         content: Text(verificationFailed.message.toString())));
                   },
                   codeSent: (verificationId, resendingToken) async {

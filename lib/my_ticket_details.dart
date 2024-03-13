@@ -34,6 +34,8 @@ class _MyBookedTicketState extends State<MyBookedTicket> {
   late TextEditingController pickupTime;
   late TextEditingController seatQuantity;
   late TextEditingController busNumber;
+  late TextEditingController ticketNumber;
+
 
 
 
@@ -55,6 +57,7 @@ class _MyBookedTicketState extends State<MyBookedTicket> {
     'pick_time':'',
     'booked_quantity':'',
     'bus_number':'',
+    'ticket_number':'',
   };
 
   final firebaseStore = FirebaseFirestore.instance;
@@ -71,6 +74,8 @@ class _MyBookedTicketState extends State<MyBookedTicket> {
   late String getPickTimeFirebase;
   late String getSeatQuantityFirebase;
   late String getBusNumberFirebase;
+  late String getTicketNumberFirebase;
+
 
 
 
@@ -84,6 +89,8 @@ class _MyBookedTicketState extends State<MyBookedTicket> {
     getPickTimeFirebase = pickupTime.text;
     getSeatQuantityFirebase = seatQuantity.text;
     getBusNumberFirebase = busNumber.text;
+    getTicketNumberFirebase = ticketNumber.text;
+
 
 
 
@@ -102,6 +109,8 @@ class _MyBookedTicketState extends State<MyBookedTicket> {
           userBookingInfo['booked_quantity'] = response.docs[0]['booked_quantity'];
           getBusNumberFirebase =
           userBookingInfo['bus_number'] = response.docs[0]['bus_number'];
+          getTicketNumberFirebase =
+          userBookingInfo['ticket_number'] = response.docs[0]['ticket_number'];
 
           //if logic check database null value and set database value in TextField..
           if (getPickLocationFirebase == null) {
@@ -133,6 +142,11 @@ class _MyBookedTicketState extends State<MyBookedTicket> {
           } else {
             busNumber = TextEditingController(text: '$getBusNumberFirebase');
           }
+          if (getTicketNumberFirebase == null) {
+            ticketNumber = TextEditingController(text: '');
+          } else {
+            ticketNumber = TextEditingController(text: '$getTicketNumberFirebase');
+          }
         });
       }
       print(getBusNumberFirebase);
@@ -153,6 +167,8 @@ class _MyBookedTicketState extends State<MyBookedTicket> {
     pickupTime = TextEditingController();
     seatQuantity = TextEditingController();
     busNumber = TextEditingController();
+    ticketNumber = TextEditingController();
+
 
 
 
@@ -316,6 +332,17 @@ class _MyBookedTicketState extends State<MyBookedTicket> {
                       decoration: InputDecoration(labelText: 'Bus Number'),
                       keyboardType: TextInputType.name,
                       controller: busNumber,
+                      validator: (value) {
+                        if (value!.isEmpty || value is int) {
+                          return 'invalid';
+                        }
+                        return null;
+                      },
+                    ),
+                    TextFormField(
+                      decoration: InputDecoration(labelText: 'Ticket Number'),
+                      keyboardType: TextInputType.name,
+                     controller: ticketNumber,
                       validator: (value) {
                         if (value!.isEmpty || value is int) {
                           return 'invalid';

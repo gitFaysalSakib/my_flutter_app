@@ -76,8 +76,8 @@ class _MyProfileScreenListState extends State<MyProfileScreenList> {
 
   Expanded getExpand(String image, String mainText) {
     return Expanded(
-        child: FlatButton(
-      padding: EdgeInsets.all(0),
+        child: TextButton(
+        style: TextButton.styleFrom(padding:EdgeInsets.all(0)),
       child: Container(
         child: Center(
           child: Column(

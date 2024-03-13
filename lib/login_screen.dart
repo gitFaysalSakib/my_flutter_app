@@ -1,8 +1,11 @@
+import 'dart:ui';
+
 import 'package:firebase_auth/firebase_auth.dart';
 //import 'package:firebase_auth_ui/firebase_auth_ui.dart';
 import 'package:flutter/material.dart';
 import 'package:new_app/admin/screens/main/main_screen.dart';
 import 'package:new_app/new_home_screen.dart';
+import 'package:new_app/views/stream_view.dart';
 import './signUp_screen.dart';
 import 'package:provider/provider.dart';
 import 'authentication.dart';
@@ -10,6 +13,10 @@ import './home_screen.dart';
 // import './available_bus_schedule_screen.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+
+import 'google_sigin_provider.dart';
+
 
 // TextEditingController _getLoginUserEmail;
 String finalEmailget = '';
@@ -62,18 +69,6 @@ class _LoginScreenState extends State<LoginScreen> {
     print('hiiiiiiiiiiiiii');
   }
 
-  // Future<void> onchangedUser() async {
-  //   FirebaseAuth.instance.authStateChanges().listen((User? user) {
-  //     if (user == null) {
-  //       print('User is null!');
-  //     } else {
-  //       print('User is signed in!');
-  //       String id = user.uid;
-  //       print(id);
-  //     }
-  //   });
-  // }
-
   //User user = FirebaseAuth.instance.currentUser;
 
   Future<void> inputData() async {
@@ -89,28 +84,6 @@ class _LoginScreenState extends State<LoginScreen> {
     // print(uid);
     // here you write the codes to input the data into firestore
   }
-
-  // Future <void> getCurrentUser() async {
-  //   final FirebaseUser user = await auth.currentUser;
-  //    uid = user.uid;
-  //   print('hi');
-  //   // currentUser = auth.currentUser;
-  //   //  userId = currentUser.uid;
-  //   //  if(currentUser == null){
-  //   //    print('false');
-  //   //
-  //   //  }else{
-  //   //    print('true');
-  //   //  }
-  //   // print(userId);
-  //   // print('hi i am');
-  //
-  //   // here you write the codes to input the data into firestore
-  // }
-
-  // String userId ='';
-  //  final auth = FirebaseAuth.instance;
-  //  User currentUser;
 
   @override
   void initState() {
@@ -173,7 +146,6 @@ class _LoginScreenState extends State<LoginScreen> {
     showDialog(
         context: context,
         builder: (ctx) => AlertDialog(
-
               title: Text('An Error Occured'),
               content: Text(mes),
               actions: <Widget>[
@@ -214,12 +186,11 @@ class _LoginScreenState extends State<LoginScreen> {
 
       if (_authData['email'] == "faysal@gmail.com" &&
           _authData['password'] == '123456') {
-        Navigator.of(context)
-            .pushReplacementNamed(MainScreen.routeName);
+        Navigator.of(context).pushReplacementNamed(MainScreen.routeName);
       } else {
         print('yes it work');
         Navigator.of(context).pushReplacementNamed(NewHomeScreen.routeName);
-        // Navigator.of(context).pushReplacementNamed(SignupScreen.routeName);
+        // Navigator.of(context).pushReplacementNamed(StreamView.routeName);
 
         //getCurrentUIDNew();
       }
@@ -235,13 +206,12 @@ class _LoginScreenState extends State<LoginScreen> {
       appBar: AppBar(
         title: Text('Login'),
         backgroundColor: Colors.teal,
-
         actions: <Widget>[
-          FlatButton(
+          TextButton(
             child: Row(
               children: <Widget>[Text('Singup'), Icon(Icons.person_add)],
             ),
-            textColor: Colors.white,
+            style:TextButton.styleFrom(textStyle: TextStyle(color: Colors.white)),
             onPressed: () {
               Navigator.of(context)
                   .pushReplacementNamed(SignupScreen.routeName);
@@ -263,7 +233,6 @@ class _LoginScreenState extends State<LoginScreen> {
                 'images/dailyBus.png',
                 height: 200.0,
               ),
-
               Container(
                 height: 220,
                 width: 300,
@@ -286,7 +255,8 @@ class _LoginScreenState extends State<LoginScreen> {
                             },
                             onSaved: (value) {
                               _authData['email'] = value!;
-                            }),
+                            }
+                            ),
 
                         // Password field....
                         TextFormField(
@@ -308,16 +278,18 @@ class _LoginScreenState extends State<LoginScreen> {
                           margin: EdgeInsets.all(10),
                           width: double.infinity,
                           child: ElevatedButton(
-                            child: Text('LOGIN',
-                                style: TextStyle(
-                                fontSize: 20,
-                                letterSpacing: 2.2,
-                                color: Colors.white
-                            ),),
-                            style: ElevatedButton.styleFrom(primary: Colors.teal,
+                            child: Text(
+                              'LOGIN',
+                              style: TextStyle(
+                                  fontSize: 20,
+                                  letterSpacing: 2.2,
+                                  color: Colors.white),
+                            ),
+                            style: ElevatedButton.styleFrom(
+                              primary: Colors.teal,
                               shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(30),
-                              ) ,
+                              ),
                             ),
                             onPressed: () async {
                               _submit();
@@ -339,7 +311,6 @@ class _LoginScreenState extends State<LoginScreen> {
                                 }
                               });
 
-
                               // onchangedUser();
 
                               // getCurrentUser();
@@ -357,12 +328,119 @@ class _LoginScreenState extends State<LoginScreen> {
                               //shared_preferences use...
                             },
                           ),
-                        )
+                        ),
+
+
                       ],
                     ),
                   ),
                 ),
               ),
+              Container(
+                margin: EdgeInsets.all(10),
+                width: double.infinity,
+                child: ElevatedButton(
+                  child: Text(
+                    'Sign Up With Facebook',
+                    style: TextStyle(
+                        fontSize: 20,
+                        letterSpacing: 2.2,
+                        color: Colors.white),
+                  ),
+                  style: ElevatedButton.styleFrom(
+                    primary: Colors.teal,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(30),
+                    ),
+                  ),
+                  onPressed: () async {
+                    _submit();
+                    saveLogInDatabase();
+                    // getCurrentUID();
+                    // getInstructorId();
+
+                    FirebaseAuth.instance
+                        .authStateChanges()
+                        .listen((User? user) {
+                      if (user == null) {
+                        print('User is null!');
+                      } else {
+                        print('User is signed in!');
+                        String id = user.uid;
+                        print(id);
+                        // Navigator.of(context)
+                        //     .pushReplacementNamed(NewHomeScreen.routeName);
+                      }
+                    });
+
+                    // onchangedUser();
+
+                    // getCurrentUser();
+                    //print(uid);
+                    //  _stayLogedCheck();
+                    //inputData();
+                    // final User user = _auth.currentUser;
+                    // if (user == null) {
+                    //   return;
+                    //
+                    // }
+                    // final String uid = user.uid;
+                    // print(uid);
+
+                    //shared_preferences use...
+                  },
+                ),
+              ),
+              Container(
+                margin: EdgeInsets.all(10),
+                width: double.infinity,
+                child: ElevatedButton.icon(
+                  icon: FaIcon(FontAwesomeIcons.google,color: Colors.red,),
+                  label: Text(
+                    'Sign Up With Google',
+                    style: TextStyle(
+                        fontSize: 20,
+                        letterSpacing: 2.2,
+                        color: Colors.white),
+                  ),
+                  style: ElevatedButton.styleFrom(
+                    primary: Colors.teal,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(30),
+                    ),
+                  ),
+                  onPressed: () async {
+                    final provider =
+                    Provider.of<GoogleSignInProvider>(context, listen: false);
+                    provider.googleLogin();
+                    Navigator.of(context)
+                        .pushReplacementNamed(NewHomeScreen.routeName);
+                    // FirebaseAuth.instance
+                    //     .authStateChanges()
+                    //     .listen((User? user) {
+                    //   if (user == null) {
+                    //     print('User is null!');
+                    //   } else {
+                    //     print('User is signed in!');
+                    //     String id = user.uid;
+                    //     String? name = user.displayName;
+                    //     String? email = user.email;
+                    //     // print(id);
+                    //     // print(name);
+                    //     // print(email);
+                    //     Navigator.of(context)
+                    //         .pushReplacementNamed(NewHomeScreen.routeName);
+                    //   }
+                    // });
+
+                    // Navigator.of(context)
+                    //     .pushReplacementNamed(NewHomeScreen.routeName);
+
+
+                  },
+                ),
+              ),
+
             ],
           ),
         ),

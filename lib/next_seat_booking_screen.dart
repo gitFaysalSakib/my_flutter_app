@@ -20,7 +20,6 @@ import './login_screen.dart';
 import 'new_home_screen.dart';
 import 'dart:math';
 
-
 class NextSeatBooking extends StatefulWidget {
   static const routeName = '/nextseatbook';
 
@@ -54,14 +53,159 @@ class _NextSeatBookingState extends State<NextSeatBooking> {
   // create a Map for retrieve data bustimetable..
   Map busTimeTableData = {'bus_number': ''};
 
+  Map bookingDurationData = {'booking_duration': ''};
+  Map bookingTypeData = {'booking_type': ''};
+
   CollectionReference busTimeTableUpdateFireStore =
       FirebaseFirestore.instance.collection('busSeatUpdate');
 
   CollectionReference bookedUsersFireStore =
       FirebaseFirestore.instance.collection('bookedUsers');
 
+  CollectionReference bookedUsersType =
+      FirebaseFirestore.instance.collection('userBookingTypeInfo');
 
-  void randomNumber(){
+  CollectionReference seatPriceTable =
+      FirebaseFirestore.instance.collection('adminSetPrice');
+
+  int total = 0;
+  int totalWithSeat = 0;
+  String totalConvert = '';
+  int storeTotalForstore = 0;
+
+  void seatSelectMessage() {
+    showDialog(
+        context: context,
+        builder: (context) {
+          return AlertDialog(
+            title: Column(
+              children: [
+                Text('Please Choose Your Seat'),
+                // Text('Total Cost: ${storeSeatAndDayCalculate}'),
+              ],
+            ),
+            content: Column(
+              children: <Widget>[
+                ElevatedButton(
+                    onPressed: () {
+                      Navigator.of(context).pop();
+                    },
+                    child: Text('ok'))
+              ],
+            ),
+          );
+        });
+  }
+
+  void priceCheckMessage() {
+    showDialog(
+        context: context,
+        builder: (context) {
+          return AlertDialog(
+            title: Column(
+              children: [
+                Text('Booking Duration: ${bookingDuration}'),
+                Text('Total Price: ${totalWithSeat}'),
+                // Text('Total Cost: ${storeSeatAndDayCalculate}'),
+              ],
+            ),
+            content: Column(
+              children: <Widget>[
+                ElevatedButton(
+                    onPressed: () {
+                      Navigator.of(context).pop();
+                    },
+                    child: Text('ok'))
+              ],
+            ),
+          );
+        });
+  }
+
+  Map adminSeatPriceData = {
+    'seat_price': '',
+    'seat_type': '',
+  };
+
+  Future<void> calculatePrice() async {
+    // int seatValuechange = int.parse(seatRadio1);
+    //print(seatValuechange);
+    user = _firebaseAuth.currentUser!;
+    String getUserID = user.uid;
+
+    var response =
+        await bookedUsersType.where('userID', isEqualTo: getUserID).get();
+    if (response.docs.length > 0) {
+      setState(() async {
+        bookingDuration = bookingDurationData['booking_duration'] =
+            response.docs[0]['booking_duration'];
+        bookingType =
+            bookingTypeData['booking_type'] = response.docs[0]['booking_type'];
+        print(bookingType);
+
+        if (bookingDuration == '1 Day') {
+          int day = 1;
+          var responsePrice = await seatPriceTable
+              .where('seat_type', isEqualTo: bookingType)
+              .get();
+          if (responsePrice.docs.length > 0) {
+            setState(() {
+              bookingSeatPrice = adminSeatPriceData['seat_price'] =
+                  responsePrice.docs[0]['seat_price'];
+              //print(bookingSeatPrice);
+
+              int amount = int.parse(bookingSeatPrice);
+              total = day * amount;
+              storeTotalForstore = total;
+              print(total);
+            });
+          }
+        } else if (bookingDuration == '1 WEEK') {
+          int day = 5;
+          var responsePrice = await seatPriceTable
+              .where('seat_type', isEqualTo: bookingType)
+              .get();
+          if (responsePrice.docs.length > 0) {
+            setState(() {
+              bookingSeatPrice = adminSeatPriceData['seat_price'] =
+                  responsePrice.docs[0]['seat_price'];
+              //print(bookingSeatPrice);
+
+              int amount = int.parse(bookingSeatPrice);
+              total = day * amount;
+              storeTotalForstore = total;
+
+              print(total);
+            });
+          }
+        } else if (bookingDuration == '1 MONTH') {
+          int day = 20;
+          var responsePrice = await seatPriceTable
+              .where('seat_type', isEqualTo: bookingType)
+              .get();
+          if (responsePrice.docs.length > 0) {
+            setState(() {
+              bookingSeatPrice = adminSeatPriceData['seat_price'] =
+                  responsePrice.docs[0]['seat_price'];
+              //print(bookingSeatPrice);
+
+              int amount = int.parse(bookingSeatPrice);
+              total = day * amount;
+              storeTotalForstore = total;
+
+              print(total);
+            });
+          }
+        }
+        print(bookingDuration);
+      });
+    }
+    print(response);
+
+    print('ok done');
+  }
+
+  void randomNumber() {
     Random random = new Random();
     int randomNumber = random.nextInt(10000);
     print(randomNumber);
@@ -77,6 +221,10 @@ class _NextSeatBookingState extends State<NextSeatBooking> {
   late String userSelectBusTime;
   int userBusSeatsQuantity = 0;
   String busNumberFromFireStore = '';
+  String bookingDuration = '';
+  String bookingType = '';
+  String bookingSeatPrice = '';
+
   String busNumberUpdateFireStore = '';
   int busCurrentSeatUpdate = 0;
   String currentSeatTest = '';
@@ -103,7 +251,10 @@ class _NextSeatBookingState extends State<NextSeatBooking> {
   }
 
   Future<void> addUserBookingInfo() async {
+    // clauclate price and add databse so use claculate method here
+    calculatePrice();
 
+    //
     Random random = new Random();
     int randomNumber = random.nextInt(10000);
     String randomString = randomNumber.toString();
@@ -131,7 +282,47 @@ class _NextSeatBookingState extends State<NextSeatBooking> {
         .catchError((error) => print('fail:$error'));
     print(userBusBookedInfo);
     print(getUserID);
+  }
 
+  Future<void> updateUserBookingInfo() async {
+    String storeDocumentID;
+
+    Random random = new Random();
+    int randomNumber = random.nextInt(10000);
+    String randomString = randomNumber.toString();
+    print(randomNumber);
+
+    String userPickupLocation = suggestionTextfieldController.text;
+    String conStringUserInputSeat = userInputSeats.toString();
+
+    print(userPickupLocation);
+
+    user = _firebaseAuth.currentUser!;
+    String getUserID = user.uid;
+    var response = await bookedUsersFireStore
+        .where('userID', isEqualTo: getUserID)
+        .get()
+        .then((QuerySnapshot snapshot) => {
+              snapshot.docs.forEach((DocumentSnapshot doc) {
+                storeDocumentID = doc.id;
+
+                Map<String, String> userBusBookedInfo = {
+                  'booked_quantity': conStringUserInputSeat,
+                  'bus_number': busNumberUpdateFireStore,
+                  'destination': userDestination,
+                  'pick_location': userPickupLocation,
+                  'pick_time': userSelectBusTime,
+                  'ticket_number': randomString,
+                  'userID': getUserID
+                };
+
+                bookedUsersFireStore
+                    .doc(storeDocumentID)
+                    .set(userBusBookedInfo, SetOptions(merge: true))
+                    .then((value) => print('Update'))
+                    .catchError((error) => print('fail:$error'));
+              })
+            });
   }
 
   Future<void> checkBusSeatCorrect() async {
@@ -181,7 +372,7 @@ class _NextSeatBookingState extends State<NextSeatBooking> {
             .where('pick_up_location', isEqualTo: userPickupLocation)
             .where('pick_up_time', isEqualTo: userSelectBusTime)
             .get();
-       print(userPickupLocation);
+        print(userPickupLocation);
         print(userSelectBusTime);
 
         if (response.docs.length > 0) {
@@ -194,7 +385,7 @@ class _NextSeatBookingState extends State<NextSeatBooking> {
                 .where('bus_number', isEqualTo: busNumberFromFireStore)
                 .get()
                 .then((QuerySnapshot snapshot) => {
-                      snapshot.docs.forEach((DocumentSnapshot doc) {
+                      snapshot.docs.forEach((DocumentSnapshot doc) async {
                         storeDocumentID = doc.id;
                         print(storeDocumentID);
 
@@ -213,8 +404,8 @@ class _NextSeatBookingState extends State<NextSeatBooking> {
                         //         snapshot.docs[0]['total_bus_seats'];
 
                         currentSeatTest =
-                        busTimeTableUpdateData['current_seat'] =
-                        snapshot.docs[0]['current_seat'];
+                            busTimeTableUpdateData['current_seat'] =
+                                snapshot.docs[0]['current_seat'];
 
                         //new..
                         busCurrentSeatUpdate = int.parse(currentSeatTest);
@@ -223,32 +414,30 @@ class _NextSeatBookingState extends State<NextSeatBooking> {
                         print(currentSeatTest);
                         print(busCurrentSeatUpdate);
 
-
-
                         if (busCurrentSeatUpdate >= userInputSeats) {
                           setUpdateSeatFireStore =
                               busCurrentSeatUpdate - userInputSeats;
 
                           //new..
-                          String updateSeatConTOString = setUpdateSeatFireStore.toString();
+                          String updateSeatConTOString =
+                              setUpdateSeatFireStore.toString();
                           print(updateSeatConTOString);
 
                           // Map<String, int> data = <String, int>{
                           //   'current_seat': setUpdateSeatFireStore,
                           // };
 
-                         // new..
+                          // new..
                           Map<String, String> dataTest = <String, String>{
                             'current_seat': updateSeatConTOString,
                           };
-                         // print(dataTest);
+                          // print(dataTest);
 
                           // busTimeTableUpdateFireStore
                           //     .doc(storeDocumentID)
                           //     .set(data, SetOptions(merge: true))
                           //     .then((value) => print('Update'))
                           //     .catchError((error) => print('fail:$error'));
-
 
                           //new..
                           busTimeTableUpdateFireStore
@@ -258,15 +447,29 @@ class _NextSeatBookingState extends State<NextSeatBooking> {
                               .catchError((error) => print('fail:$error'));
 
                           //after booking user booking info store ....
-                          addUserBookingInfo();
-                          sucessfullMessage();
-                        } else {
+                          user = _firebaseAuth.currentUser!;
+                          String getUserID = user.uid;
+                          var response = await bookedUsersFireStore
+                              .where('userID', isEqualTo: getUserID)
+                              .get();
+                          if (response.docs.length > 0) {
+                            updateUserBookingInfo();
+                            sucessfullMessage();
+                          } else {
+                            addUserBookingInfo();
+                            sucessfullMessage();
+                          }
 
+                          // addUserBookingInfo();
+                          // sucessfullMessage();
+                        } else {
                           showDialog(
                               context: context,
                               builder: (context) {
                                 return AlertDialog(
-                                  title: Text('Sorry seats or Schedule not unavailable'"\n"
+                                  title: Text(
+                                      'Sorry seats or Schedule not unavailable'
+                                      "\n"
                                       'please choose another Schedule '),
                                   content: Column(
                                     children: <Widget>[
@@ -282,8 +485,6 @@ class _NextSeatBookingState extends State<NextSeatBooking> {
                                   ),
                                 );
                               });
-
-
                         }
 
                         print(busNumberUpdateFireStore);
@@ -296,7 +497,28 @@ class _NextSeatBookingState extends State<NextSeatBooking> {
 
           // print('hhhhhiiiiiiiiii');
 
-
+        } else {
+          showDialog(
+              context: context,
+              builder: (context) {
+                return AlertDialog(
+                  title: Text('Sorry This Schedule not unavailable'
+                      "\n"
+                      'please choose another Schedule '),
+                  content: Column(
+                    children: <Widget>[
+                      ElevatedButton(
+                        onPressed: () {
+                          // Navigator.of(context)
+                          //     .pushReplacementNamed(NextSeatBooking.routeName);
+                          Navigator.of(context).pop();
+                        },
+                        child: Text('Ok'),
+                      ),
+                    ],
+                  ),
+                );
+              });
         }
       } on FirebaseException catch (e) {
         print(e);
@@ -399,6 +621,7 @@ class _NextSeatBookingState extends State<NextSeatBooking> {
         // 'getDayBusTime':getDayBusTime,
       };
       _ref.push().set(storeCustomerData);
+
       showDialog(
           context: context,
           builder: (context) {
@@ -438,6 +661,7 @@ class _NextSeatBookingState extends State<NextSeatBooking> {
 
     // showUserData();
     // showUserPhone();
+    calculatePrice();
     super.initState();
   }
 
@@ -465,11 +689,11 @@ class _NextSeatBookingState extends State<NextSeatBooking> {
           title: Text('Booked Your Seat'),
           backgroundColor: Colors.teal,
           actions: <Widget>[
-            FlatButton(
+            TextButton(
               child: Row(
                 children: <Widget>[Icon(Icons.home)],
               ),
-              textColor: Colors.white,
+              style:TextButton.styleFrom(textStyle: TextStyle(color: Colors.white)),
               onPressed: () {
                 Navigator.of(context)
                     .pushReplacementNamed(NewHomeScreen.routeName);
@@ -518,7 +742,7 @@ class _NextSeatBookingState extends State<NextSeatBooking> {
                       onChanged: (value) {
                         setState(() {
                           newSelectedLocationNew = value;
-                         // print(newSelectedLocationNew);
+                          // print(newSelectedLocationNew);
                         });
                       }),
                 ),
@@ -552,65 +776,6 @@ class _NextSeatBookingState extends State<NextSeatBooking> {
                       ),
                       items: _mySelectedLocation.map(buildMenuItem).toList(),
                       onChanged: (value) {
-                        // setState(() {
-                        //   if (suggestionTextfieldController.text ==
-                        //       suggestionTextfieldControllerDestination.text) {
-                        //     // selectDestination =null;
-                        //     // print('hiii');
-                        //     showDialog(
-                        //         context: context,
-                        //         builder: (context) {
-                        //           return AlertDialog(
-                        //             title:
-                        //                 Text('Please Input Correct Location'),
-                        //             content: Column(
-                        //               children: <Widget>[
-                        //                 ElevatedButton(
-                        //                     onPressed: () {
-                        //                       Navigator.of(context)
-                        //                           .pushReplacementNamed(
-                        //                               NextSeatBooking
-                        //                                   .routeName);
-                        //                     },
-                        //                     child: Text('ok'))
-                        //               ],
-                        //             ),
-                        //           );
-                        //         });
-                        //   } else {
-                        //     newSelectedDestinationNew = value;
-                        //     print('hi');
-                        //   }
-                        // });
-
-                        // if (suggestionTextfieldControllerDestination.text
-                        //         == suggestionTextfieldController.text) {
-                        //   // selectDestination =null;
-                        //   // print('hiii');
-                        //   showDialog(
-                        //       context: context,
-                        //       builder: (context) {
-                        //         return AlertDialog(
-                        //           title:
-                        //           Text('Please Input Correct Location'),
-                        //           content: Column(
-                        //             children: <Widget>[
-                        //               ElevatedButton(
-                        //                   onPressed: () {
-                        //                     Navigator.of(context)
-                        //                         .pushReplacementNamed(
-                        //                         NextSeatBooking
-                        //                             .routeName);
-                        //                   },
-                        //                   child: Text('ok'))
-                        //             ],
-                        //           ),
-                        //         );
-                        //       });
-                        // } else {
-                        //   newSelectedDestinationNew = value;
-                        //   print('hi');
-                        // }
                         setState(() {
                           newSelectedDestinationNew = value;
                         });
@@ -659,8 +824,6 @@ class _NextSeatBookingState extends State<NextSeatBooking> {
                         });
                       }),
                 ),
-
-
 
                 SizedBox(
                   height: 0.0,
@@ -751,13 +914,26 @@ class _NextSeatBookingState extends State<NextSeatBooking> {
                   margin: EdgeInsets.all(10),
                   width: double.infinity,
                   child: ElevatedButton(
-                      onPressed: () {
+                      onPressed: () async {
                         //  saveCustomerPass();
                         // Navigator.of(context).pushReplacementNamed(HomeScreen.routeName);
                         // checkBusSeat();
                         print('hiiiiiiii');
 
                         checkBusSeatCorrect();
+
+                        // user = _firebaseAuth.currentUser!;
+                        // String getUserID = user.uid;
+                        // var response = await bookedUsersFireStore
+                        //     .where('userID', isEqualTo: getUserID)
+                        //     .get();
+                        // if (response.docs.length > 0){
+                        //   updateUserBookingInfo();
+                        //   sucessfullMessage();
+                        // }else{
+                        //   addUserBookingInfo();
+                        //   sucessfullMessage();
+                        // }
                       },
                       style: ElevatedButton.styleFrom(
                         primary: Colors.teal,
@@ -772,15 +948,45 @@ class _NextSeatBookingState extends State<NextSeatBooking> {
                             letterSpacing: 2.2,
                             color: Colors.white),
                       )),
-                )
+                ),
+                Container(
+                    margin: EdgeInsets.all(10),
+                    width: double.infinity,
+                    child: ElevatedButton(
+                        onPressed: () {
+                          // userInputSeats = int.parse(seatRadio1);
+                          // String seatValue = userInputSeats.toString();
+                          int seatValuechange = int.parse(seatRadio1);
+                          totalWithSeat = total * seatValuechange;
+
+                          print(totalWithSeat);
+
+                          if (seatRadio1 == '') {
+                            print('value not input');
+                            seatSelectMessage();
+                          } else {
+                            priceCheckMessage();
+                          }
+                        },
+                        style: ElevatedButton.styleFrom(
+                          primary: Colors.teal,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(30),
+                          ),
+                        ),
+                        child: Text(
+                          'Check Price',
+                          style: TextStyle(
+                              fontSize: 20,
+                              letterSpacing: 2.2,
+                              color: Colors.white),
+                        )))
 
                 //FloatingActionButton(onPressed: _checkDestination),
                 //Text(selectLocation, style: TextStyle(fontSize: 20.0),textAlign: TextAlign.center,
               ],
             ),
           ),
-        )
-
-        );
+        ));
   }
 }

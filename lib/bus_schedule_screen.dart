@@ -5,6 +5,7 @@ import 'package:get/get.dart';
 import 'package:new_app/gabtoli_bus_start_time_test.dart';
 import 'package:new_app/hire_customize_bus.dart';
 import 'package:new_app/personal_info_setup_screen.dart';
+import 'package:new_app/services/cloude_firestore.dart';
 import 'package:new_app/গাবতলী_bus_scheduleList_screen.dart';
 import 'package:new_app/seat_booking_screen.dart';
 
@@ -21,194 +22,123 @@ class NewBusSchedule extends StatefulWidget {
 }
 
 class _NewBusScheduleState extends State<NewBusSchedule> {
-
   FirebaseAuth _firebaseAuth = FirebaseAuth.instance;
+  final FirestoreService fire = FirestoreService();
+
   late User user;
-
-
-  CollectionReference usersProfile = FirebaseFirestore.instance.collection('profile');
-  CollectionReference usersPhone = FirebaseFirestore.instance.collection('UserPhoneNumber');
-
-  Map userPersonalData = {'firstName': '', 'lastName': ''};
-  Map userPhoneNumber = {'PhoneNumber': ''};
-
-  String getFirstNameFirebase = ' ';
-  String getLastNameFirebase = ' ';
-  String getPhoneNumber = ' ';
-
-  // User data show on dashboard...
-  Future<void> showUserData() async {
-    user = _firebaseAuth.currentUser!;
-    String userId = user.uid;
-    try {
-      var response =
-      await usersProfile.where('LogInUserID', isEqualTo: userId).get();
-      if (response.docs.length > 0) {
-        setState(() {
-          getFirstNameFirebase = userPersonalData['firstName'] = response.docs[0]['firstName'];
-          getLastNameFirebase =  userPersonalData['lastName'] = response.docs[0]['lastName'];
-        });
-
-      }
-      print(getFirstNameFirebase);
-    } on FirebaseException catch (e) {
-      print(e);
-    } catch (error) {
-      print(error);
-    }
-  }
-
-  // User Phone Number show on dashboard...
-  Future<void> showUserPhone() async {
-    user = _firebaseAuth.currentUser!;
-    String userId = user.uid;
-    print(userId);
-    try {
-      var response =
-      await usersPhone.where('UserId', isEqualTo: userId).get();
-      if (response.docs.length > 0) {
-        setState(() {
-          getPhoneNumber = userPhoneNumber['PhoneNumber'] = response.docs[0]['PhoneNumber'];
-        });
-
-      }
-      print(getPhoneNumber);
-    } on FirebaseException catch (e) {
-      print(e);
-    } catch (error) {
-      print(error);
-    }
-  }
-
 
   Future<void> _signOut() async {
     await _firebaseAuth.signOut();
     user = await _firebaseAuth.currentUser!;
-    // String id = user.uid;
   }
-
 
   @override
   void initState() {
-    showUserData();
-    showUserPhone();
+    fire.showUserPhone();
+    fire.showUserData();
     super.initState();
   }
-
 
   // create custom widget...
   Expanded getExpand(String mainText) {
     return Expanded(
-        child: FlatButton(
-          padding: EdgeInsets.all(0),
-          color: Colors.teal[200],
-          child: Container(
-            child: Center(
-              child: Column(
-                children: <Widget>[
-                  SizedBox(
-                    height: 20.0,
-                  ),
-
-                  SizedBox(height: 20.0),
-                  Text(
-                    mainText,
-                    style: TextStyle(
-                        fontWeight: FontWeight.bold,
-                        color: Colors.white,
-                        fontSize: 20.0),
-                  )
-                ],
+        child: TextButton(
+        style: TextButton.styleFrom(padding:EdgeInsets.all(0),
+            backgroundColor: Colors.teal[200]),
+      child: Container(
+        child: Center(
+          child: Column(
+            children: <Widget>[
+              SizedBox(
+                height: 20.0,
               ),
-            ),
-            margin: EdgeInsets.only(left: 10.0, right: 10.0, bottom: 10.0),
-            decoration: BoxDecoration(
-                color: Colors.green[800],
-                borderRadius: BorderRadius.only(
-                  topLeft: Radius.circular(5),
-                  topRight: Radius.circular(5),
-                  bottomLeft: Radius.circular(5),
-                  bottomRight: Radius.circular(5),
-                ),
-                boxShadow: [
-                  BoxShadow(),
-                ]),
+              SizedBox(height: 20.0),
+              Text(
+                mainText,
+                style: TextStyle(
+                    fontWeight: FontWeight.bold,
+                    color: Colors.white,
+                    fontSize: 20.0),
+              )
+            ],
           ),
-          onPressed: () {
-            if (mainText == 'গাবতলী') {
-              // Navigator.of(context).pushReplacementNamed(PriceList.routeName);
-              Navigator.of(context).pushReplacementNamed(GabtoliBusTimeShow.routeName);
+        ),
+        margin: EdgeInsets.only(left: 10.0, right: 10.0, bottom: 10.0),
+        decoration: BoxDecoration(
+            color: Colors.green[800],
+            borderRadius: BorderRadius.only(
+              topLeft: Radius.circular(5),
+              topRight: Radius.circular(5),
+              bottomLeft: Radius.circular(5),
+              bottomRight: Radius.circular(5),
+            ),
+            boxShadow: [
+              BoxShadow(),
+            ]),
+      ),
+      onPressed: () {
+        if (mainText == 'গাবতলী') {
+          // Navigator.of(context).pushReplacementNamed(PriceList.routeName);
+          Navigator.of(context)
+              .pushReplacementNamed(GabtoliBusTimeShow.routeName);
 
-              print('hiiiiii');
-            } else if (mainText == 'My Ticket') {
-            } else if (mainText == 'My Journey') {
-            } else if (mainText == 'My Offers') {
-            } else if (mainText == 'Profile Setting') {
-            } else if (mainText == 'My Ticket') {}
-          },
-        ));
+          print('hiiiiii');
+        } else if (mainText == 'My Ticket') {
+        } else if (mainText == 'My Journey') {
+        } else if (mainText == 'My Offers') {
+        } else if (mainText == 'Profile Setting') {
+        } else if (mainText == 'My Ticket') {}
+      },
+    ));
   }
-
-
 
   Expanded getNewExpanded(String mainText) {
     return Expanded(
-        child: FlatButton(
-          padding: EdgeInsets.all(0),
-          color: Colors.teal[900],
-          child: Container(
-            child: Center(
-              child: Column(
-                children: <Widget>[
-                  SizedBox(
-                    height: 20.0,
-                  ),
-
-                  SizedBox(height: 20.0),
-                  Text(
-                    mainText,
-                    style: TextStyle(
-                        fontWeight: FontWeight.bold,
-                        color: Colors.white,
-                        fontSize: 20.0),
-                  )
-                ],
+        child: TextButton(
+          style: TextButton.styleFrom(padding:EdgeInsets.all(0),
+    backgroundColor: Colors.teal[900]),
+      child: Container(
+        child: Center(
+          child: Column(
+            children: <Widget>[
+              SizedBox(
+                height: 20.0,
               ),
-            ),
-            margin: EdgeInsets.only(left: 10.0, right: 10.0, bottom: 10.0),
-            decoration: BoxDecoration(
-                color: Colors.lightGreen[400],
-                borderRadius: BorderRadius.only(
-                  topLeft: Radius.circular(5),
-                  topRight: Radius.circular(5),
-                  bottomLeft: Radius.circular(5),
-                  bottomRight: Radius.circular(5),
-                ),
-                boxShadow: [
-                  BoxShadow(),
-                ]),
+              SizedBox(height: 20.0),
+              Text(
+                mainText,
+                style: TextStyle(
+                    fontWeight: FontWeight.bold,
+                    color: Colors.white,
+                    fontSize: 20.0),
+              )
+            ],
           ),
-          onPressed: () {
-            if (mainText == 'গাবতলী') {
-              Navigator.of(context).pushReplacementNamed(PriceList.routeName);
-            } else if (mainText == 'My Ticket') {
-            } else if (mainText == 'My Journey') {
-            } else if (mainText == 'My Offers') {
-            } else if (mainText == 'Profile Setting') {
-            } else if (mainText == 'My Ticket') {}
-          },
-        ));
+        ),
+        margin: EdgeInsets.only(left: 10.0, right: 10.0, bottom: 10.0),
+        decoration: BoxDecoration(
+            color: Colors.lightGreen[400],
+            borderRadius: BorderRadius.only(
+              topLeft: Radius.circular(5),
+              topRight: Radius.circular(5),
+              bottomLeft: Radius.circular(5),
+              bottomRight: Radius.circular(5),
+            ),
+            boxShadow: [
+              BoxShadow(),
+            ]),
+      ),
+      onPressed: () {
+        if (mainText == 'গাবতলী') {
+          Navigator.of(context).pushReplacementNamed(PriceList.routeName);
+        } else if (mainText == 'My Ticket') {
+        } else if (mainText == 'My Journey') {
+        } else if (mainText == 'My Offers') {
+        } else if (mainText == 'Profile Setting') {
+        } else if (mainText == 'My Ticket') {}
+      },
+    ));
   }
-
-
-
-
-
-
-
-
-
-
 
   @override
   Widget build(BuildContext context) {
@@ -218,11 +148,11 @@ class _NewBusScheduleState extends State<NewBusSchedule> {
           appBar: AppBar(
             title: Text('Bus schedule'),
             actions: <Widget>[
-              FlatButton(
+              TextButton(
                 child: Row(
                   children: <Widget>[Icon(Icons.home)],
                 ),
-                textColor: Colors.white,
+                style:TextButton.styleFrom(textStyle: TextStyle(color: Colors.white)),
                 onPressed: () {
                   Navigator.of(context)
                       .pushReplacementNamed(NewHomeScreen.routeName);
@@ -234,109 +164,81 @@ class _NewBusScheduleState extends State<NewBusSchedule> {
             child: ListView(
               children: <Widget>[
                 DrawerHeader(
-                    decoration: BoxDecoration(
-                        gradient: LinearGradient(colors: <Color>[
-                          Colors.teal,
-                          Colors.teal
-                        ])),
-                    child:Text('$getFirstNameFirebase'+ '$getLastNameFirebase'+ '\n$getPhoneNumber',
-                      style:TextStyle(color: Colors.white,fontSize: 20.0) ,),
-                ),
-
-                ListTile(
-                    leading: const Icon(Icons.person, size: 28.0,),
-                    title: const Text("MY PROFILE", style: TextStyle(fontSize: 18.0),),
-                    onTap: () => {
-                      Navigator.of(context)
-                          .pushReplacementNamed(MyProfileScreenList.routeName),
-                    }
+                  decoration: BoxDecoration(
+                      gradient: LinearGradient(
+                          colors: <Color>[Colors.teal, Colors.teal])),
+                  child: Text(
+                    '$getFirstNameFirebase' +
+                        '$getLastNameFirebase' +
+                        '\n$getPhoneNumber',
+                    style: TextStyle(color: Colors.white, fontSize: 20.0),
+                  ),
                 ),
                 ListTile(
-                    leading: const Icon(Icons.bus_alert, size: 28.0,),
-                    title: const Text("BUY BUSS PASS", style: TextStyle(fontSize: 18.0),),
+                    leading: const Icon(
+                      Icons.person,
+                      size: 28.0,
+                    ),
+                    title: const Text(
+                      "MY PROFILE",
+                      style: TextStyle(fontSize: 18.0),
+                    ),
                     onTap: () => {
-                      Navigator.of(context)
-                          .pushReplacementNamed(SeatBooking.routeName),
-                    }
-                ),
+                          Navigator.of(context).pushReplacementNamed(
+                              MyProfileScreenList.routeName),
+                        }),
                 ListTile(
-                    leading: const Icon(Icons.schedule, size: 28.0,),
-                    title: const Text("BUS SCHEDULE", style: TextStyle(fontSize: 18.0),),
+                    leading: const Icon(
+                      Icons.bus_alert,
+                      size: 28.0,
+                    ),
+                    title: const Text(
+                      "BUY BUSS PASS",
+                      style: TextStyle(fontSize: 18.0),
+                    ),
                     onTap: () => {
-                      Navigator.of(context)
-                          .pushReplacementNamed(NewBusSchedule.routeName),
-                    }
-                ),
+                          Navigator.of(context)
+                              .pushReplacementNamed(SeatBooking.routeName),
+                        }),
                 ListTile(
-                    leading: const Icon(Icons.schedule, size: 28.0,),
-                    title: const Text("Hire A Bus", style: TextStyle(fontSize: 18.0),),
+                    leading: const Icon(
+                      Icons.schedule,
+                      size: 28.0,
+                    ),
+                    title: const Text(
+                      "BUS SCHEDULE",
+                      style: TextStyle(fontSize: 18.0),
+                    ),
                     onTap: () => {
-                      Navigator.of(context)
-                          .pushReplacementNamed(HireCustomBus.routeName),
-                    }
-                ),
+                          Navigator.of(context)
+                              .pushReplacementNamed(NewBusSchedule.routeName),
+                        }),
                 ListTile(
-                    leading: const Icon(Icons.logout, size: 28.0,),
-                    title: const Text("LOG OUT", style: TextStyle(fontSize: 18.0),),
+                    leading: const Icon(
+                      Icons.schedule,
+                      size: 28.0,
+                    ),
+                    title: const Text(
+                      "Hire A Bus",
+                      style: TextStyle(fontSize: 18.0),
+                    ),
                     onTap: () => {
-                      Navigator.of(context)
-                          .pushReplacementNamed(LoginScreen.routeName),
-                    }
-                ),
-
-                //My Profile Page link....
-                // CustomListTile(
-                //     Icons.person,
-                //     '    My',
-                //     ' Profile',
-                //         () => {
-                //       Navigator.of(context).pushReplacementNamed(
-                //           MyProfileScreenList.routeName),
-                //     }),
-
-                //My bus sit booking....
-                // CustomListTile(
-                //     Icons.directions_bus_sharp,
-                //     '    Buy',
-                //     '   Bus Pass',
-                //         () => {
-                //       Navigator.of(context)
-                //           .pushReplacementNamed(SeatBooking.routeName),
-                //
-                //       // Navigator.of(context).pushReplacementNamed(SeatBooking.routeName),
-                //       // Navigator.push(context,
-                //       //     MaterialPageRoute(builder: (context) =>SeatBooking(storeBookedData: newStoreBooked,))
-                //       // )
-                //     }),
-
-                // CustomListTile(
-                //     Icons.money_sharp,
-                //     '    Check',
-                //     ' Price' ' List',
-                //         () => {
-                //       Navigator.of(context)
-                //           .pushReplacementNamed(PriceList.routeName),
-                //     }),
-
-                // CustomListTile(
-                //     Icons.av_timer_sharp,
-                //     '    Bus Schedule',
-                //     '',
-                //         () => {
-                //       Navigator.of(context)
-                //           .pushReplacementNamed(NewBusSchedule.routeName),
-                //     }),
-
-
-                // CustomListTile(
-                //     Icons.logout,
-                //     '    LogOut  ',
-                //     '',
-                //         () => {
-                //       _signOut(),
-                //       Navigator.of(context)
-                //           .pushReplacementNamed(LoginScreen.routeName),
-                //     }),
+                          Navigator.of(context)
+                              .pushReplacementNamed(HireCustomBus.routeName),
+                        }),
+                ListTile(
+                    leading: const Icon(
+                      Icons.logout,
+                      size: 28.0,
+                    ),
+                    title: const Text(
+                      "LOG OUT",
+                      style: TextStyle(fontSize: 18.0),
+                    ),
+                    onTap: () => {
+                          Navigator.of(context)
+                              .pushReplacementNamed(LoginScreen.routeName),
+                        }),
               ],
             ),
           ),
@@ -373,11 +275,8 @@ class _NewBusScheduleState extends State<NewBusSchedule> {
                 ),
                 SizedBox(
                   height: 500,
-
-
                   child: TabBarView(
                     children: [
-
                       Container(
                         child: Column(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -385,53 +284,50 @@ class _NewBusScheduleState extends State<NewBusSchedule> {
                             SizedBox(
                               height: 10.0,
                             ),
-
                             Expanded(
                                 child: Row(
-                                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                                  children: <Widget>[
-                                    getExpand('গাবতলী'),
-                                    getExpand('শ্যামলী '),
-                                  ],
-                                )),
+                              crossAxisAlignment: CrossAxisAlignment.stretch,
+                              children: <Widget>[
+                                getExpand('গাবতলী'),
+                                getExpand('শ্যামলী '),
+                              ],
+                            )),
                             Expanded(
                                 child: Row(
-                                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                                  children: <Widget>[
-                                    getExpand('কলেজ গেট '),
-                                    getExpand('আসাদ গেট '),
-                                  ],
-                                )),
+                              crossAxisAlignment: CrossAxisAlignment.stretch,
+                              children: <Widget>[
+                                getExpand('কলেজ গেট '),
+                                getExpand('আসাদ গেট '),
+                              ],
+                            )),
                             Expanded(
                                 child: Row(
-                                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                                  children: <Widget>[
-                                    getExpand('ধানমন্ডি'),
-                                    getExpand('কলাবাগান '),
-                                  ],
-                                )),
+                              crossAxisAlignment: CrossAxisAlignment.stretch,
+                              children: <Widget>[
+                                getExpand('ধানমন্ডি'),
+                                getExpand('কলাবাগান '),
+                              ],
+                            )),
                             Expanded(
                                 child: Row(
-                                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                                  children: <Widget>[
-                                    getExpand('সাইন্সল্যাব '),
-                                    getExpand('নিউ মার্কেট '),
-                                  ],
-                                )),
+                              crossAxisAlignment: CrossAxisAlignment.stretch,
+                              children: <Widget>[
+                                getExpand('সাইন্সল্যাব '),
+                                getExpand('নিউ মার্কেট '),
+                              ],
+                            )),
                             Expanded(
                                 child: Row(
-                                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                                  children: <Widget>[
-                                    getExpand('আজিমপুর'),
-                                    getExpand('গুলিস্তান'),
-                                  ],
-                                )),
+                              crossAxisAlignment: CrossAxisAlignment.stretch,
+                              children: <Widget>[
+                                getExpand('আজিমপুর'),
+                                getExpand('গুলিস্তান'),
+                              ],
+                            )),
                           ],
-
                         ),
                       ),
                       Container(
-
                         child: Column(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: <Widget>[
@@ -439,52 +335,49 @@ class _NewBusScheduleState extends State<NewBusSchedule> {
                               height: 10.0,
                             ),
                             Expanded(
-
                                 child: Row(
-                                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                                  children: <Widget>[
-                                    getNewExpanded('গুলিস্তান'),
-                                    getNewExpanded('আজিমপুর'),
-                                  ],
-                                )),
+                              crossAxisAlignment: CrossAxisAlignment.stretch,
+                              children: <Widget>[
+                                getNewExpanded('গুলিস্তান'),
+                                getNewExpanded('আজিমপুর'),
+                              ],
+                            )),
                             Expanded(
                                 child: Row(
-                                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                                  children: <Widget>[
-                                    getNewExpanded('নিউ মার্কেট'),
-                                    getNewExpanded('সাইন্সল্যাব'),
-                                  ],
-                                )),
+                              crossAxisAlignment: CrossAxisAlignment.stretch,
+                              children: <Widget>[
+                                getNewExpanded('নিউ মার্কেট'),
+                                getNewExpanded('সাইন্সল্যাব'),
+                              ],
+                            )),
                             Expanded(
                                 child: Row(
-                                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                                  children: <Widget>[
-                                    getNewExpanded('কলাবাগান'),
-                                    getNewExpanded('ধানমন্ডি'),
-                                  ],
-                                )),
+                              crossAxisAlignment: CrossAxisAlignment.stretch,
+                              children: <Widget>[
+                                getNewExpanded('কলাবাগান'),
+                                getNewExpanded('ধানমন্ডি'),
+                              ],
+                            )),
                             Expanded(
                                 child: Row(
-                                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                                  children: <Widget>[
-                                    getNewExpanded('আসাদ গেট '),
-                                    getNewExpanded('কলেজ গেট '),
-                                  ],
-                                )),
+                              crossAxisAlignment: CrossAxisAlignment.stretch,
+                              children: <Widget>[
+                                getNewExpanded('আসাদ গেট '),
+                                getNewExpanded('কলেজ গেট '),
+                              ],
+                            )),
                             Expanded(
                                 child: Row(
-                                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                                  children: <Widget>[
-                                    getNewExpanded('শ্যামলী'),
-                                    getNewExpanded('গাবতলী'),
-                                  ],
-                                )),
+                              crossAxisAlignment: CrossAxisAlignment.stretch,
+                              children: <Widget>[
+                                getNewExpanded('শ্যামলী'),
+                                getNewExpanded('গাবতলী'),
+                              ],
+                            )),
                           ],
-
                         ),
                       ),
                       Container(
-
                         child: Column(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: <Widget>[
@@ -492,52 +385,49 @@ class _NewBusScheduleState extends State<NewBusSchedule> {
                               height: 10.0,
                             ),
                             Expanded(
-
                                 child: Row(
-                                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                                  children: <Widget>[
-                                    getNewExpanded('গুলিস্তান'),
-                                    getNewExpanded('আজিমপুর'),
-                                  ],
-                                )),
+                              crossAxisAlignment: CrossAxisAlignment.stretch,
+                              children: <Widget>[
+                                getNewExpanded('গুলিস্তান'),
+                                getNewExpanded('আজিমপুর'),
+                              ],
+                            )),
                             Expanded(
                                 child: Row(
-                                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                                  children: <Widget>[
-                                    getNewExpanded('নিউ মার্কেট'),
-                                    getNewExpanded('সাইন্সল্যাব'),
-                                  ],
-                                )),
+                              crossAxisAlignment: CrossAxisAlignment.stretch,
+                              children: <Widget>[
+                                getNewExpanded('নিউ মার্কেট'),
+                                getNewExpanded('সাইন্সল্যাব'),
+                              ],
+                            )),
                             Expanded(
                                 child: Row(
-                                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                                  children: <Widget>[
-                                    getNewExpanded('কলাবাগান'),
-                                    getNewExpanded('ধানমন্ডি'),
-                                  ],
-                                )),
+                              crossAxisAlignment: CrossAxisAlignment.stretch,
+                              children: <Widget>[
+                                getNewExpanded('কলাবাগান'),
+                                getNewExpanded('ধানমন্ডি'),
+                              ],
+                            )),
                             Expanded(
                                 child: Row(
-                                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                                  children: <Widget>[
-                                    getNewExpanded('আসাদ গেট '),
-                                    getNewExpanded('কলেজ গেট '),
-                                  ],
-                                )),
+                              crossAxisAlignment: CrossAxisAlignment.stretch,
+                              children: <Widget>[
+                                getNewExpanded('আসাদ গেট '),
+                                getNewExpanded('কলেজ গেট '),
+                              ],
+                            )),
                             Expanded(
                                 child: Row(
-                                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                                  children: <Widget>[
-                                    getNewExpanded('শ্যামলী'),
-                                    getNewExpanded('গাবতলী'),
-                                  ],
-                                )),
+                              crossAxisAlignment: CrossAxisAlignment.stretch,
+                              children: <Widget>[
+                                getNewExpanded('শ্যামলী'),
+                                getNewExpanded('গাবতলী'),
+                              ],
+                            )),
                           ],
-
                         ),
                       ),
                       Container(
-
                         child: Column(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: <Widget>[
@@ -545,51 +435,48 @@ class _NewBusScheduleState extends State<NewBusSchedule> {
                               height: 10.0,
                             ),
                             Expanded(
-
                                 child: Row(
-                                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                                  children: <Widget>[
-                                    getNewExpanded('গুলিস্তান'),
-                                    getNewExpanded('আজিমপুর'),
-                                  ],
-                                )),
+                              crossAxisAlignment: CrossAxisAlignment.stretch,
+                              children: <Widget>[
+                                getNewExpanded('গুলিস্তান'),
+                                getNewExpanded('আজিমপুর'),
+                              ],
+                            )),
                             Expanded(
                                 child: Row(
-                                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                                  children: <Widget>[
-                                    getNewExpanded('নিউ মার্কেট'),
-                                    getNewExpanded('সাইন্সল্যাব'),
-                                  ],
-                                )),
+                              crossAxisAlignment: CrossAxisAlignment.stretch,
+                              children: <Widget>[
+                                getNewExpanded('নিউ মার্কেট'),
+                                getNewExpanded('সাইন্সল্যাব'),
+                              ],
+                            )),
                             Expanded(
                                 child: Row(
-                                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                                  children: <Widget>[
-                                    getNewExpanded('কলাবাগান'),
-                                    getNewExpanded('ধানমন্ডি'),
-                                  ],
-                                )),
+                              crossAxisAlignment: CrossAxisAlignment.stretch,
+                              children: <Widget>[
+                                getNewExpanded('কলাবাগান'),
+                                getNewExpanded('ধানমন্ডি'),
+                              ],
+                            )),
                             Expanded(
                                 child: Row(
-                                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                                  children: <Widget>[
-                                    getNewExpanded('আসাদ গেট '),
-                                    getNewExpanded('কলেজ গেট '),
-                                  ],
-                                )),
+                              crossAxisAlignment: CrossAxisAlignment.stretch,
+                              children: <Widget>[
+                                getNewExpanded('আসাদ গেট '),
+                                getNewExpanded('কলেজ গেট '),
+                              ],
+                            )),
                             Expanded(
                                 child: Row(
-                                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                                  children: <Widget>[
-                                    getNewExpanded('শ্যামলী'),
-                                    getNewExpanded('গাবতলী'),
-                                  ],
-                                )),
+                              crossAxisAlignment: CrossAxisAlignment.stretch,
+                              children: <Widget>[
+                                getNewExpanded('শ্যামলী'),
+                                getNewExpanded('গাবতলী'),
+                              ],
+                            )),
                           ],
-
                         ),
                       ),
-
                     ],
                   ),
                 ),

@@ -25,10 +25,11 @@
          FlutterApplication and put your custom class here. -->
     <application
         android:usesCleartextTraffic="true"
-
-
         android:label="new_app"
-        android:icon="@mipmap/ic_launcher">
+        android:icon="@mipmap/ic_launcher"
+
+
+        >
 
         <meta-data android:name="com.google.android.geo.API_KEY"
             android:value="AIzaSyAHdpGEAaLgEZliF_d78SEM0Kx0B8i7wdk"/>
@@ -42,7 +43,7 @@
             android:value="barcode" /> <!--barcode,face,ocr-->
 
         <activity
-            android:name=".MainActivity"
+            android:name="io.flutter.embedding.android.FlutterActivity"
             android:exported="true"
 
             android:launchMode="singleTop"
@@ -52,15 +53,7 @@
             android:windowSoftInputMode="adjustResize">
 
 
-            <meta-data
-                android:name="io.flutter.embedding.android.NormalTheme"
-                android:resource="@style/NormalTheme"
-                />
 
-            <meta-data
-                android:name="io.flutter.embedding.android.SplashScreenDrawable"
-                android:resource="@drawable/launch_background"
-                />
 
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>
@@ -73,6 +66,11 @@
         <meta-data
             android:name="flutterEmbedding"
             android:value="2" />
+        <meta-data
+            android:name="io.flutter.embedding.android.SplashScreenDrawable"
+            android:resource="@drawable/launch_background" />
+
+
     </application>
 
     <uses-sdk

@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:data_table_2/data_table_2.dart';
 import 'package:new_app/admin/fireUserDataQuery/database_manager.dart';
@@ -30,6 +32,12 @@ class _GabtoliBusTimeShowState extends State<GabtoliBusTimeShow> {
   Map getBusNumberData = {
     'bus_number': '',
   };
+  late var i;
+  var gabtoli;
+  late List<String> result;
+  var gabtoliSlotStore;
+
+
 
   Future<void> _showMyDialog() async {
     return showDialog<void>(
@@ -127,16 +135,6 @@ class _GabtoliBusTimeShowState extends State<GabtoliBusTimeShow> {
                 style: TextStyle(fontSize: 14),
               ),
             ),
-
-            // const Text("User Booking Details"),
-            SizedBox(
-              height: 20,
-              child: Text(
-                '',
-                style: TextStyle(fontSize: 16),
-              ),
-            ),
-            // const Text("User Booking"),
           ],
         ),
       ),
@@ -144,23 +142,74 @@ class _GabtoliBusTimeShowState extends State<GabtoliBusTimeShow> {
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Expanded(
-            //   child: SideMenu(),
-            // ),
             Expanded(
               //flex: 5,
               child: FutureBuilder(
                 future: FirestoreGabtoliTimeShow().getData(),
                 builder:
                     (BuildContext context, AsyncSnapshot<dynamic> snapshot) {
-                  // if (snapshot.hasError) {
-                  //   return const Text(
-                  //     "Something went wrong",
-                  //   );
-                  // }
-                  if (snapshot.connectionState == ConnectionState.done) {
-                    dataList = snapshot.data as List;
-                    return buildItems(dataList);
+                  if (snapshot.connectionState == ConnectionState.done){
+                    // for ( i = 0; i < snapshot.data.length; i++) {
+                    //
+                    //   //dataList.add(snapshot.data);
+                    //   if(snapshot.data[i]['pick_up_location'] == 'কলেজ গেট বাস স্ট্যান্ড'){
+                    //      gabtoli =snapshot.data[i]['pick_up_time'];
+                    //    // result = snapshot.data[i]['pick_up_time'].split(',');
+                    //      print(gabtoli);
+                    //      dataList.add(gabtoli);
+                    //      print(dataList);
+                    //     //dataList[i] = snapshot.data[i]['pick_up_time'];
+                    //
+                    //    //print(gabtoli);
+                    //    // print(result);
+                    //    //dataList = result;
+                    //      //return buildItems(dataList);
+                    //   // print(dataList);
+                    //   }
+                    //  // print(result);
+                    //
+                    //   // print(gabtoli);
+                    // }
+                 // print(result.toList());
+
+                  // print(gabtoli);
+
+                    // for(var total in snapshot.data){
+                    //
+                    //
+                    //   // if(snapshot.data[total]['pick_up_location'] == 'কলেজ গেট বাস স্ট্যান্ড'){
+                    //   //   print('workkkkkk');
+                    //   //
+                    //   //
+                    //     dataList.add(total);
+                    //   //  print(dataList);
+                    //   //
+                    //   // }
+                    // }
+
+
+                  // print(dataList);
+
+                 dataList = snapshot.data;
+                    //print(dataList);
+
+                    //dataList = gabtoli[i].toList();
+                    //result = snapshot.data[i]['pick_up_time'].split(',');
+                   // dataList = result;
+                  //  print(dataList);
+
+
+
+                        // for (var result in snapshot.data) {
+                        //   //print(result);
+                        //   dataList.add(result.data());
+                        // }
+
+                        return buildItems(dataList);
+
+
+
+                   // return buildItems(dataList);
                   }
                   return const Center(child: CircularProgressIndicator());
                 },
@@ -172,17 +221,13 @@ class _GabtoliBusTimeShowState extends State<GabtoliBusTimeShow> {
     );
   }
 
-  Widget buildItems(dataList) => ListView.separated(
+  Widget buildItems(dataListData) => ListView.separated(
       padding: const EdgeInsets.all(8),
-      itemCount: dataList.length,
+      itemCount: dataListData.length,
       separatorBuilder: (BuildContext context, int index) => const Divider(),
       itemBuilder: (BuildContext context, int index) {
+
         return Container(
-          // padding: EdgeInsets.all(defaultPadding),
-          // decoration: BoxDecoration(
-          //   color: secondaryColor,
-          //   borderRadius: const BorderRadius.all(Radius.circular(10)),
-          // ),
           height: 70,
           margin: EdgeInsets.all(8.0),
           decoration: BoxDecoration(
@@ -201,66 +246,12 @@ class _GabtoliBusTimeShowState extends State<GabtoliBusTimeShow> {
                 trailing:
                     Icon(Icons.bus_alert, color: Colors.white, size: 30.0),
                 title: Text(
-                  dataList[index]["pick_up_time"],
+
+                  dataListData[index]["pick_up_time"],
                   style: TextStyle(color: Colors.white, fontSize: 20),
                 ),
               ),
-              // Icon(Icons.edit,color: Colors.white, size: 30.0,
-              // ),
-              // ListTile(
-              //   trailing: Icon(
-              //     Icons.delete_forever,
-              //     color: Colors.white,
-              //     size: 30.0,
-              //   ),
-              //   selected: dataList[index]["bus_number"] == getBusNumber,
-              //   onLongPress: () {
-              //     dataList[index]["bus_number"] == index;
-              //     getBusNumber = dataList[index]["bus_number"];
-              //     delectFunction();
-              //     _showMyDialog();
-              //
-              //   },
-              // ),
-              // Text(
-              //   "Recent Files",
-              //   style: Theme.of(context).textTheme.subtitle1,
-              // ),
-              // SizedBox(
-              //   width: double.infinity,
-              //   child: DataTable2(
-              //     columnSpacing: defaultPadding,
-              //     minWidth: 100,
-              //     columns: [
-              //       DataColumn(
-              //         label: Text(dataList[index]["bus_name"]),
-              //       ),
-              //       DataColumn(
-              //         label: Text(dataList[index]["bus_number"]),
-              //       ),
-              //       DataColumn(
-              //         label: Text(dataList[index]["bus_routes"]),
-              //       ),
-              //       DataColumn(
-              //         label: Text(dataList[index]["pick_up_location"]),
-              //       ),
-              //       DataColumn(
-              //         label: Text(dataList[index]["pick_up_time"]),
-              //       ),
-              //       DataColumn(
-              //         label: Text(dataList[index]["total_bus_seats"]),
-              //       ),
-              //
-              //       // DataColumn(
-              //       //   label: Text("User ID"),
-              //       // ),
-              //       // DataColumn(
-              //       //   label: Text("Phone Number"),
-              //       // ),
-              //     ],
-              //     rows: [],
-              //   ),
-              // ),
+
             ],
           ),
         );

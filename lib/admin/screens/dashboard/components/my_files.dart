@@ -1,6 +1,7 @@
 import 'package:new_app/admin//responsive.dart';
 import 'package:flutter/material.dart';
 import 'package:new_app/admin/addNewBus/add_new_bus.dart';
+import 'package:new_app/admin/addNewBus/add_price_of_seat.dart';
 import 'package:new_app/admin/models/MyFiles.dart';
 import '../../../constants.dart';
 import 'file_info_card.dart';
@@ -46,11 +47,11 @@ class MyFiles extends StatelessWidget {
                 ),
               ),
               onPressed: () {
-                // Navigator.of(context)
-                //     .pushReplacementNamed(NewBusAddAdmin.routeName);
+                Navigator.of(context)
+                    .pushReplacementNamed(PriceSetOfSeat.routeName);
               },
               icon: Icon(Icons.add),
-              label: Text("Create New Pick-Up Point"),
+              label: Text("Pricing Set"),
             ),
           ],
         ),
